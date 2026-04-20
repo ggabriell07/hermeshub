@@ -67,7 +67,7 @@ Workflow n8n:
 4. `Code` — extrai e valida JSON da resposta
 5. `Respond to Webhook` — retorna array de ideias
 
-O prompt inclui nicho, persona do público-alvo, tom de voz e objetivos definidos no onboarding — o conteúdo gerado não é genérico, é contextualizado por usuário.
+O prompt inclui nicho, persona do público-alvo, tom de voz e objetivos definidos no onboarding o conteúdo gerado não é genérico, é contextualizado por usuário.
 
 ---
 
