@@ -1,0 +1,12 @@
+{
+  "name": "hermeshub-public-reference",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sanitized engineering references from the HermesHub AI content SaaS.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
