@@ -1,87 +1,161 @@
 # HermesHub
 
-SaaS de criação de conteúdo para Instagram com geração por LLM. Frontend ~95% completo, desenvolvimento pausado.
+AI-assisted content SaaS prototype integrating **LLM generation, OAuth2, encrypted third-party credentials, Supabase and Instagram Graph API**.
 
----
+The project is paused as a product, but remains useful as an engineering case study for secure API integration and contextual AI generation.
 
-## O que faz
+## Architecture
 
-O usuário descreve o negócio dele em um wizard de onboarding (nicho, persona, tom de voz, objetivos). A partir disso, o sistema gera ideias de conteúdo, legendas e plano editorial personalizado usando Claude Sonnet como modelo de linguagem.
+```text
+React / TypeScript
+      ↓
+Supabase Auth
+      ↓
+PostgreSQL + RLS
+      ↓
+Generation workflow
+      ↓
+Claude
+      ↓
+Structured content output
 
----
-
-## Arquitetura
-
+Instagram connection
+      ↓
+OAuth2
+      ↓
+AES-256-GCM encrypted token persistence
+      ↓
+Instagram Graph API
 ```
-Browser (React/TypeScript)
-    ↓
-Supabase Auth (email/senha)
-    ↓
-Supabase DB (PostgreSQL + RLS)
-    ↓
-n8n webhook  →  Claude Sonnet API  →  resposta JSON
-    ↓
-Instagram Graph API (leitura de perfil e métricas)
+
+## Engineering focus
+
+- contextual LLM generation using account-specific onboarding data
+- authenticated multi-user application state
+- Supabase Auth and PostgreSQL RLS
+- Instagram OAuth2 integration
+- encrypted access-token persistence
+- external API permissions
+- structured LLM output
+- CI/CD through GitHub Actions
+
+## Public reference implementation
+
+The complete product source is private.
+
+This repository contains sanitized engineering references that demonstrate selected patterns without publishing credentials or proprietary application code.
+
+```text
+examples/
+  token-vault.js
+
+test/
+  token-vault.test.js
+
+docs/
+  architecture.md
+  security.md
+
+.github/workflows/
+  test.yml
 ```
 
-**CI/CD**
-```
-push → GitHub Actions → deploy HostGator
+## AES-256-GCM token storage example
+
+The public token-vault example demonstrates authenticated encryption for sensitive third-party credentials.
+
+```javascript
+const crypto = require('node:crypto');
+const { encryptToken, decryptToken } = require('./examples/token-vault');
+
+const key = crypto.randomBytes(32);
+const encrypted = encryptToken('example-token', key);
+
+decryptToken(encrypted, key);
 ```
 
----
+The encryption key is intentionally external to the encrypted payload.
+
+Production systems should store encryption keys in protected secret-management infrastructure rather than source code or application tables.
+
+## Run the public tests
+
+Requires Node.js 20+.
+
+```bash
+npm test
+```
+
+The current tests verify:
+
+- AES-256-GCM token round-trip
+- invalid key-size rejection
+
+## Security principles
+
+- do not persist third-party access tokens in plaintext
+- keep encryption keys outside the database
+- request only necessary OAuth permissions
+- avoid logging credentials
+- treat token revocation and rotation as lifecycle concerns
+- separate browser-visible data from server-side secrets
+
+See [docs/security.md](docs/security.md) for more detail.
+
+## AI generation flow
+
+A simplified generation flow:
+
+```text
+business context
++ audience
++ tone
++ content objective
+        ↓
+prompt/context builder
+        ↓
+LLM
+        ↓
+structured result validation
+        ↓
+application UI
+```
+
+The objective was to make generation account-specific instead of using generic prompts for every user.
 
 ## Stack
 
-| Camada | Tecnologia | Detalhe |
-|---|---|---|
-| Frontend | React + TypeScript | gerado via Lovable |
-| Backend | Supabase | PostgreSQL, Auth, RLS policies |
-| LLM | Claude Sonnet | via HTTP Request no n8n |
-| Automação | n8n self-hosted | webhooks de geração |
-| API social | Instagram Graph API | leitura de perfil, posts, métricas |
-| CI/CD | GitHub Actions | deploy automático |
-| Hospedagem | HostGator | domínio hermeshub.io |
+**Frontend**  
+React · TypeScript
 
----
+**Backend / Data**  
+Supabase · PostgreSQL · Auth · RLS
 
-## Autenticação com Instagram
+**AI**  
+Claude · Structured generation
 
-Fluxo OAuth2 completo via Meta for Developers.
+**Integration**  
+Instagram Graph API · OAuth2
 
-- App ID registrado: `1364365331718102`
-- Permissões: `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`
-- Access token persistido no Supabase com encriptação **AES-GCM-256**
-- Conta de teste integrada: `@hermeshub.ai`
+**Security**  
+AES-256-GCM
 
-O token é encriptado no momento da escrita e descriptografado somente em tempo de uso, nunca exposto em texto plano.
+**Delivery**  
+GitHub Actions
 
----
+## Repository scope
 
-## Geração de conteúdo
+Not included:
 
-Workflow n8n:
-1. `Webhook` — recebe `{ nicho, quantidade, contexto_usuario }`
-2. `Code` — monta prompt com contexto do perfil do usuário
-3. `HTTP Request` — Claude Sonnet API
-4. `Code` — extrai e valida JSON da resposta
-5. `Respond to Webhook` — retorna array de ideias
+- production credentials
+- OAuth client secrets
+- real access tokens
+- real user accounts
+- full private frontend source
+- private workflow configuration
 
-O prompt inclui nicho, persona do público-alvo, tom de voz e objetivos definidos no onboarding o conteúdo gerado não é genérico, é contextualizado por usuário.
+## Status
 
----
+Product development is currently paused.
 
-## Frontend
-
-Construído com React + TypeScript via Lovable. Componentes principais:
-
-- **Wizard de onboarding** — 4 etapas com persistência de estado no Supabase
-- **Dashboard** — métricas do Instagram (seguidores, posts, engajamento)
-- **Gerador de ideias** — input de contexto + grid de resultados
-- **Conexão Instagram** — botão OAuth2, status de conexão, opção de desconectar
-
----
-
-## O que não está aqui
-
-Código-fonte completo não público. O repositório documenta arquitetura, decisões técnicas e estrutura de integração.
+The repository is maintained as a secondary engineering case study focused on AI SaaS architecture, OAuth2 integration and secure credential handling.
